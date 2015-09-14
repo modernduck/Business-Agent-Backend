@@ -1,0 +1,34 @@
+<html>
+<head>
+	<title>Test NG</title>
+	<script type="text/javascript" src="../../../lib/angular/angular.min.js"></script>
+	<script type="text/javascript" src="../../../lib/angular/angular-resource.min.js"></script>
+	<script type="text/javascript">
+		angular.module("app", ['ngResource'])
+		.factory('Brand', ['$resource',
+		  function($resource){
+		    return $resource('../service/web/brands', {}, {
+		      query: {method:'GET', isArray:true}
+		    });
+		  }]);
+
+		function TestCtrl ($scope, Brand) {
+			// body...
+			$scope.result = "nothing"
+			$scope.test = function()
+			{
+				$scope.result = Brand.query();
+				alert('sended')
+			}
+		}
+
+
+	</script>
+</head>
+<body ng-app="app" ng-controller="TestCtrl">
+	<button ng-click="test()">Test Req</button>
+	<div>
+		{{result}}
+	</div>
+</body>
+</html>
