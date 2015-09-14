@@ -5,7 +5,7 @@
 	<script type="text/javascript" src="../../lib/angular/angular-resource.min.js"></script>
 	<script type="text/javascript">
 	
-		WEB_PATH = "web/index.php/";
+		WEB_PATH = "../service/web/";
 
 
 		angular.module("app", ['ngResource'])
@@ -63,11 +63,30 @@
 		      save: {method:"POST", params:{branch_id:"@branch_id"}},
 		      update: {method:"PUT", params:{branch_id:"@branch_id", id:"@id"}},
 		      delete: {method:"DELETE", params:{branch_id:"@branch_id", id:"@id"}},
-
+		      get: {method:"GET", params:{branch_id:"@branch_id", id:"@id"}},
+		    });
+		  }])
+		.factory('Employee', ['$resource',
+		  function($resource){
+		    return $resource(WEB_PATH + 'branches/:branch_id/employees/:id', {}, {
+		      query: {method:'GET', params:{branch_id:"@branch_id"}, isArray:true},
+		      save: {method:"POST", params:{branch_id:"@branch_id"}},
+		      update: {method:"PUT", params:{branch_id:"@branch_id", id:"@id"}},
+		      delete: {method:"DELETE", params:{branch_id:"@branch_id", id:"@id"}},
+		      get: {method:"GET", params:{branch_id:"@branch_id", id:"@id"}},
+		    });
+		  }])
+		.factory('Sale', ['$resource',
+		  function($resource){
+		    return $resource(WEB_PATH + 'sales/:id', {}, {
+		      query: {method:'GET', params:{}, isArray:true},
+		      update: {method:"PUT", params:{id:"@id"}},
+		      delete: {method:"DELETE", params:{id:"@id"}},
+		      get:{method:"GET", params:{id:"@id"}},
 		    });
 		  }])
 
-		.controller('TestCtrl', function ($scope, Brand, Branch, ProductType, Product, Inventory) {
+		.controller('TestCtrl', function ($scope, Brand, Branch, ProductType, Product, Inventory, Employee, Sale) {
 			// body...
 			$scope.result = "nothing"
 			$scope.test = function()
@@ -288,7 +307,7 @@
 				var product_id = prompt("prduct id");
 				var raw_count = prompt("count?");
 				var count = Number(raw_count==""?0:raw_count);
-				$scope.result = Inventory.update({"token":token}, {branch_id:branch_id, product_id:product_id, count:count});
+				$scope.result = Inventory.update({"token":token}, {branch_id:branch_id, id:product_id, count:count});
 			}
 
 			$scope.inventoryDelete = function()
@@ -296,9 +315,113 @@
 				var token = prompt("token");
 				var branch_id = prompt("branch id");
 				var product_id = prompt("prduct id");
-				$scope.result = Inventory.delete({"token": token}, {branch_id:branch_id, product_id:product_id });
+				$scope.result = Inventory.delete({"token": token}, {branch_id:branch_id, id:product_id });
 			}
 
+			$scope.inventoryGet = function()
+			{
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var product_id = prompt("prduct id");
+				$scope.result = Inventory.get({"token": token}, {branch_id:branch_id, id:product_id });
+			}
+
+			//employee
+			$scope.employeeQuery = function()
+			{
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				$scope.result = Employee.query({"token": token}, {branch_id:branch_id});	
+			}
+
+			$scope.employeeCreate = function()
+			{
+				var fields = [ 'name', 'surname', 'password'];
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var items = {}
+				for(var i =0; i < fields.length;i++)
+					items[fields[i]] = prompt(fields[i] + "?");
+				var send_obj = angular.extend(items, {branch_id:branch_id})
+				$scope.result = Employee.save({"token":token}, send_obj);
+			}
+
+			$scope.employeeUpdate = function()
+			{
+				var fields = [ 'name', 'surname', 'password'];
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var id = prompt("employee id");
+				var items = {}
+				for(var i =0; i < fields.length;i++)
+					items[fields[i]] = prompt(fields[i] + "?");
+				var send_obj = angular.extend(items, {branch_id:branch_id, id:id});
+				$scope.result = Employee.update({"token":token}, send_obj);
+			}
+
+			$scope.employeeDelete = function()
+			{
+				var fields = [];
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var id = prompt("employee id");
+				var items = {}
+				for(var i =0; i < fields.length;i++)
+					items[fields[i]] = prompt(fields[i] + "?");
+				var send_obj = angular.extend(items, {branch_id:branch_id, id:id});
+				$scope.result = Employee.delete({"token":token}, send_obj);
+			}
+
+			$scope.employeeGet = function()
+			{
+				var fields = [ ];
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var id = prompt("employee id");
+				var items = {}
+				for(var i =0; i < fields.length;i++)
+					items[fields[i]] = prompt(fields[i] + "?");
+				var send_obj = angular.extend(items, {branch_id:branch_id, id:id});
+				$scope.result = Employee.get({"token":token}, send_obj);
+			}
+
+			$scope.saleQuery = function()
+			{
+				var fields = [];
+				var token = prompt("token");
+				$scope.result = Sale.query({"token":token});
+			}
+
+			$scope.saleCreate = function()
+			{
+				var orders = {};
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var count = Number(prompt("how many item?"));
+				for(var i =0; i < count ; i++)
+				{
+					var product_id = prompt("Product Id?");
+					var quantity = prompt("Quantity?");
+					orders[product_id] = quantity;
+				}
+				var send_obj = angular.extend({orders:orders}, {branch_id:branch_id});
+				$scope.result = Sale.save({"token":token}, send_obj);
+			}
+
+
+			$scope.saleGet = function()
+			{
+				var token = prompt("token");
+				var sale_id = prompt("id");
+				$scope.result = Sale.get({"token":token}, {id:sale_id});
+			}
+
+			$scope.saleDelete = function()
+			{
+				var token = prompt("token");
+				var sale_id = prompt("id");
+				$scope.result = Sale.delete({"token":token}, {id:sale_id});
+			}
 
 
 		})
@@ -339,16 +462,19 @@
 	<button ng-click="inventoryCreate()">Create</button>
 	<button ng-click="inventoryUpdate()">Update</button>
 	<button ng-click="inventoryGet()">Get</button>
+	<button ng-click="inventoryDelete()">Delete</button>
 	<h3>Employee</h3>
 	<button ng-click="employeeQuery()">Query</button>
 	<button ng-click="employeeCreate()">Create</button>
 	<button ng-click="employeeUpdate()">Update</button>
 	<button ng-click="employeeGet()">Get</button>
+	<button ng-click="employeeDelete()">Delete</button>
 	<h2>Sales</h2>
 	<button ng-click="saleQuery()">Query</button>
 	<button ng-click="saleCreate()">Create</button>
-	<button ng-click="saleUpdate()">Update</button>
+	
 	<button ng-click="saleGet()">Get</button>
+	<button ng-click="saleDelete()">Delete</button>
 
 
 	<div>
