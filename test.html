@@ -1,0 +1,341 @@
+<html>
+<head>
+	<title>Test NG</title>
+	<script type="text/javascript" src="../../lib/angular/angular.min.js"></script>
+	<script type="text/javascript" src="../../lib/angular/angular-resource.min.js"></script>
+	<script type="text/javascript">
+	
+
+
+		angular.module("app", ['ngResource'])
+		
+		.factory('Brand', ['$resource',
+		  function($resource, tokenHandler){
+		    var resource =  $resource('../service/web/brands/:id/:action', {}, {
+		      query: {method:'GET', isArray:true},
+		      update: {method:"PUT", params:{id:"@id"}},
+		      delete: {method:"DELETE", params:{id:"@id"}},
+		      getToken: {method:"GET" },
+		    });
+		   // resource = tokenHandler.wrapActions( resource, ["update"] );
+  			return resource
+
+		  }])
+		.factory('Branch', ['$resource',
+		  function($resource){
+		    return $resource('../service/web/branches/:brand_id', {}, {
+		      query: {method:'GET', isArray:true},
+		      update: {method:"PUT", params:{id:"@id"}},
+		      delete: {method:"DELETE", params:{id:"@id"}},
+		    });
+		  }])
+		.factory('ProductType', ['$resource',
+		  function($resource){
+		    return $resource('../service/web/product-types/:id', {}, {
+		      query: {method:'GET', isArray:true},
+		      update: {method:"PUT", params:{id:"@id"}},
+		      delete: {method:"DELETE", params:{id:"@id"}},
+		      remove: {method:"DELETE", params:{id:"@id"}},
+		    });
+		  }])
+		.factory('Product', ['$resource',
+		  function($resource){
+		    return $resource('../service/web/products/:id', {}, {
+		      query: {method:'GET', isArray:true},
+		      update: {method:"PUT", params:{id:"@id"}},
+		      delete: {method:"DELETE", params:{id:"@id"}},
+		    });
+		  }])
+		.factory('Branch', ['$resource',
+		  function($resource){
+		    return $resource('../service/web/branches/:id', {}, {
+		      query: {method:'GET', isArray:true},
+		      update: {method:"PUT", params:{id:"@id"}},
+		      delete: {method:"DELETE", params:{id:"@id"}},
+
+		    });
+		  }])
+		.factory('Inventory', ['$resource',
+		  function($resource){
+		    return $resource('../service/web/branches/:branch_id/inventories/:id', {}, {
+		      query: {method:'GET', params:{branch_id:"@branch_id"}, isArray:true},
+		      save: {method:"POST", params:{branch_id:"@branch_id"}},
+		      update: {method:"PUT", params:{branch_id:"@branch_id", id:"@id"}},
+		      delete: {method:"DELETE", params:{branch_id:"@branch_id", id:"@id"}},
+
+		    });
+		  }])
+
+		.controller('TestCtrl', function ($scope, Brand, Branch, ProductType, Product, Inventory) {
+			// body...
+			$scope.result = "nothing"
+			$scope.test = function()
+			{
+				$scope.result = Brand.query();
+				alert('sended')
+			}
+
+			$scope.create = function()
+			{
+				var token = prompt("token");
+				
+				var name = prompt("brand name");
+				var password = prompt('password');
+				var email = prompt('email');
+				$scope.result = Brand.save({"token":token }, {"name":name ,"owner_email":email, "password":password, "create_time":"2015-09-01 02:27:26","update_time":"2015-09-02 00:00:00"});
+				alert("created")
+			}
+
+			$scope.delete = function()
+			{
+				var token = prompt("token");
+				
+				var id = prompt("brand id");
+				$scope.result = Brand.delete({"token":token }, {id:id});
+				alert("delete")
+			}
+
+			$scope.update = function()
+			{
+				var id = prompt("id?")
+				var rand_name = prompt("name?")
+				var token = prompt("token?")
+				//TokenHandler.set(token)
+				$scope.result = Brand.update({"token": token}, { "name":rand_name, id:id})
+			}
+
+			$scope.get = function()
+			{
+				var id = prompt("id?")
+				var token = prompt("token?")
+				$scope.result = Brand.get({token:token}, {id:id})
+			}
+
+			$scope.token = function  () {
+				// body...
+				var id = prompt("id");
+				var password = prompt("password?")
+				$scope.result = Brand.getToken({id:id, password:password,action:"token"})
+			}
+
+
+			$scope.branchQuery = function()
+			{
+
+				$scope.result = Branch.query();
+				
+			}
+
+			$scope.branchCreate = function()
+			{
+				var token = prompt("token");
+				var name = prompt("name?");
+				$scope.result = Branch.save({"name":"TestBranch","brand_id":"2","description":"Branch ?", "address":"1010", "district":"Sutthisan", "province":"Bangkok", "zipcode":"10400", "create_time":"2015-09-01 02:27:26","update_time":"2015-09-02 00:00:00"});
+			}
+
+			$scope.productQuery = function()
+			{
+				$scope.result = Product.query();
+			}
+
+
+			$scope.ProductTypeQuery = function()
+			{
+				var token = prompt("token");
+				$scope.result = ProductType.query({"token":token});
+			}
+
+			$scope.ProductTypeCreate = function()
+			{
+				var name = prompt("Product Type's name");
+				var token = prompt("token");
+				
+				$scope.result = ProductType.save({"token": token}, { "name":name});
+			}
+
+			$scope.ProductTypeDelete = function  (argument) {
+				// body...
+				var id = prompt("Product Type's id");
+				var token = prompt("token???");
+				$scope.result = ProductType.remove({"token": token}, {"id":id, "fake":"fake"}, function(){}, function(){
+
+					alert("failed")
+				});
+			}
+
+			$scope.ProductTypeUpdate = function()
+			{
+				var token = prompt("token");
+				var id = prompt("id")
+				var name = prompt("new name");		
+				$scope.result = ProductType.update({"token": token}, { "name":name, "id":id});
+			}
+
+			$scope.ProductTypeGet = function()
+			{
+				var token = prompt("token");
+				var id = prompt("id")
+				$scope.result = ProductType.update({"token": token}, { "id":id});
+			}
+
+			$scope.ProductQuery = function()
+			{
+				var token = prompt("token");	
+				var product_type_id = prompt("product type id");
+				if(product_type_id.length > 0)
+					$scope.result = Product.query({"token": token,product_type_id: product_type_id});
+				else
+					$scope.result = Product.query({"token": token});
+			}
+
+			$scope.ProductCreate = function()
+			{
+				var token = prompt("token");
+				var product_type_id = prompt("type_id");
+				var name = prompt("name")
+				var price = Number(prompt("Price"));
+				var description = prompt("description");
+				var obj = {name:name, product_type_id: product_type_id, price:price, description:description};
+				$scope.result = Product.save({"token": token}, obj);
+			}
+
+			$scope.ProductUpdate = function()
+			{
+				var token = prompt("token");
+				var product_id = prompt("product id");
+				var name = prompt("name");
+				var price = prompt("price");
+				var obj = {id: product_id, name:name, price:price};
+				$scope.result = Product.update({"token": token}, obj);
+			}
+
+			$scope.ProductDelete = function()
+			{
+				var token = prompt("token");
+				var product_id = prompt("product id");
+				$scope.result = Product.delete({"token": token}, {id:product_id});
+			}
+
+			$scope.branchQuery = function()
+			{
+				var token = prompt("token");
+				$scope.result = Branch.query({"token": token});
+			}
+
+			$scope.branchCreate = function()
+			{
+				//'name', 'brand_id', 'description', 'address', 'district', 'province', 'zipcode'
+				var token = prompt("token");
+				var name = prompt("name");
+				var description = prompt("description");
+				var address = prompt("address");
+				var district = prompt("district");
+				var province = prompt("province");
+				var zipcode = prompt("zipcode");
+				$scope.result = Branch.save({"token": token}, {
+					name:name, description:description, address:address,
+					district:district, province:province, zipcode:zipcode
+				})
+			}
+
+			$scope.branchUpdate = function()
+			{
+				//'name', 'brand_id', 'description', 'address', 'district', 'province', 'zipcode'
+				var token = prompt("token");
+				var id = prompt("Branc Id");
+				var name = prompt("name");
+				var description = prompt("description");
+				var address = prompt("address");
+				var district = prompt("district");
+				var province = prompt("province");
+				var zipcode = prompt("zipcode");
+				$scope.result = Branch.update({"token": token}, {
+					id:id,
+					name:name, description:description, address:address,
+					district:district, province:province, zipcode:zipcode
+				})
+			}
+
+			$scope.branchDelete = function()
+			{
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				$scope.result = Branch.delete({"token": token}, {id:branch_id});
+			}
+
+			$scope.inventoryQuery = function()
+			{
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				$scope.result = Inventory.query({"token": token}, {branch_id:branch_id});	
+			}
+
+			$scope.inventoryCreate = function()
+			{
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var product_id = prompt("prduct id");
+				var raw_count = prompt("count?");
+				var count = Number(raw_count==""?0:raw_count);
+				$scope.result = Inventory.save({"token":token}, {branch_id:branch_id, product_id:product_id, count:count});
+			}
+
+
+
+		})
+
+		
+
+
+	</script>
+</head>
+<body ng-app="app" ng-controller="TestCtrl">
+	<h2>Brand</h2>
+	<button ng-click="test()">Query</button>
+	<button ng-click="create()">Create</button>
+	<button ng-click="update()">Update</button>
+	<button ng-click="get()">Get</button>
+	<button ng-click="delete()">Delete</button>
+	<button ng-click="token()">Token</button>
+	<h2>ProductType</h2>
+	<button ng-click="ProductTypeQuery()">Query</button>
+	<button ng-click="ProductTypeCreate()">Create</button>
+	<button ng-click="ProductTypeUpdate()">Update</button>
+	<button ng-click="ProductTypeGet()">Get</button>
+	<button ng-click="ProductTypeDelete()">Delete</button>
+	<h2>Product</h2>
+	<button ng-click="ProductQuery()">Query</button>
+	<button ng-click="ProductCreate()">Create</button>
+	<button ng-click="ProductUpdate()">Update</button>
+	<button ng-click="ProductGet()">Get</button>
+	<button ng-click="ProductDelete()">Delete</button>
+	<h2>Branch</h2>
+	<button ng-click="branchQuery()">Query</button>
+	<button ng-click="branchCreate()">Create</button>
+	<button ng-click="branchUpdate()">Update</button>
+	<button ng-click="branchGet()">Get</button>
+	<button ng-click="branchDelete()">Delete</button>
+	<h3>Inventory</h3>
+	<button ng-click="inventoryQuery()">Query</button>
+	<button ng-click="inventoryCreate()">Create</button>
+	<button ng-click="inventoryUpdate()">Update</button>
+	<button ng-click="inventoryGet()">Get</button>
+	<h3>Employee</h3>
+	<button ng-click="employeeQuery()">Query</button>
+	<button ng-click="employeeCreate()">Create</button>
+	<button ng-click="employeeUpdate()">Update</button>
+	<button ng-click="employeeGet()">Get</button>
+	<h2>Sales</h2>
+	<button ng-click="saleQuery()">Query</button>
+	<button ng-click="saleCreate()">Create</button>
+	<button ng-click="saleUpdate()">Update</button>
+	<button ng-click="saleGet()">Get</button>
+
+
+	<div>
+		{{result}}
+	</div>
+	
+
+</body>
+</html>
