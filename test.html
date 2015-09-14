@@ -5,13 +5,14 @@
 	<script type="text/javascript" src="../../lib/angular/angular-resource.min.js"></script>
 	<script type="text/javascript">
 	
+		WEB_PATH = "web/index.php/";
 
 
 		angular.module("app", ['ngResource'])
 		
 		.factory('Brand', ['$resource',
 		  function($resource, tokenHandler){
-		    var resource =  $resource('../service/web/brands/:id/:action', {}, {
+		    var resource =  $resource(WEB_PATH + 'brands/:id/:action', {}, {
 		      query: {method:'GET', isArray:true},
 		      update: {method:"PUT", params:{id:"@id"}},
 		      delete: {method:"DELETE", params:{id:"@id"}},
@@ -23,7 +24,7 @@
 		  }])
 		.factory('Branch', ['$resource',
 		  function($resource){
-		    return $resource('../service/web/branches/:brand_id', {}, {
+		    return $resource(WEB_PATH + 'branches/:brand_id', {}, {
 		      query: {method:'GET', isArray:true},
 		      update: {method:"PUT", params:{id:"@id"}},
 		      delete: {method:"DELETE", params:{id:"@id"}},
@@ -31,7 +32,7 @@
 		  }])
 		.factory('ProductType', ['$resource',
 		  function($resource){
-		    return $resource('../service/web/product-types/:id', {}, {
+		    return $resource(WEB_PATH + 'product-types/:id', {}, {
 		      query: {method:'GET', isArray:true},
 		      update: {method:"PUT", params:{id:"@id"}},
 		      delete: {method:"DELETE", params:{id:"@id"}},
@@ -40,7 +41,7 @@
 		  }])
 		.factory('Product', ['$resource',
 		  function($resource){
-		    return $resource('../service/web/products/:id', {}, {
+		    return $resource(WEB_PATH + 'products/:id', {}, {
 		      query: {method:'GET', isArray:true},
 		      update: {method:"PUT", params:{id:"@id"}},
 		      delete: {method:"DELETE", params:{id:"@id"}},
@@ -48,7 +49,7 @@
 		  }])
 		.factory('Branch', ['$resource',
 		  function($resource){
-		    return $resource('../service/web/branches/:id', {}, {
+		    return $resource(WEB_PATH + 'branches/:id', {}, {
 		      query: {method:'GET', isArray:true},
 		      update: {method:"PUT", params:{id:"@id"}},
 		      delete: {method:"DELETE", params:{id:"@id"}},
@@ -57,7 +58,7 @@
 		  }])
 		.factory('Inventory', ['$resource',
 		  function($resource){
-		    return $resource('../service/web/branches/:branch_id/inventories/:id', {}, {
+		    return $resource(WEB_PATH + 'branches/:branch_id/inventories/:id', {}, {
 		      query: {method:'GET', params:{branch_id:"@branch_id"}, isArray:true},
 		      save: {method:"POST", params:{branch_id:"@branch_id"}},
 		      update: {method:"PUT", params:{branch_id:"@branch_id", id:"@id"}},
@@ -278,6 +279,24 @@
 				var raw_count = prompt("count?");
 				var count = Number(raw_count==""?0:raw_count);
 				$scope.result = Inventory.save({"token":token}, {branch_id:branch_id, product_id:product_id, count:count});
+			}
+
+			$scope.inventoryUpdate = function()
+			{
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var product_id = prompt("prduct id");
+				var raw_count = prompt("count?");
+				var count = Number(raw_count==""?0:raw_count);
+				$scope.result = Inventory.update({"token":token}, {branch_id:branch_id, product_id:product_id, count:count});
+			}
+
+			$scope.inventoryDelete = function()
+			{
+				var token = prompt("token");
+				var branch_id = prompt("branch id");
+				var product_id = prompt("prduct id");
+				$scope.result = Inventory.delete({"token": token}, {branch_id:branch_id, product_id:product_id });
 			}
 
 

@@ -152,6 +152,25 @@ class BranchController extends ActiveController
         
     }
 
+    public function branchCheckAccess($branch_id)
+    {
+        $request = Yii::$app->request;
+        $token = $request->get(self::TOKEN_NAME);
+        $brand = Brand::findIdentityByAccessToken($token);   
+
+        $branch = Brand::findOne($branch_id);
+
+        if(Brand::isGodToken($token))
+        {
+
+        }else if(!isset($brand) )
+            throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not brand)");
+        else if(!isset($branch) )
+            throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not Model) :".$request->getUrl());
+        else if( $branch->brand_id != $brand->id)
+            throw  new \yii\web\HttpException(403, "you shall not pass fcker!");
+    }
+
     /*
     Inventory
     */
@@ -171,9 +190,7 @@ class BranchController extends ActiveController
     public function actionInventoryCreate($id)
     {
         $request = Yii::$app->request;
-        $token = $request->get(self::TOKEN_NAME);
-        $brand = Brand::findIdentityByAccessToken($token);
-        //$branch = Branch::findOne($id);
+         $this->branchCheckAccess($id);
 
         $model =  new Inventory();
         $model->branch_id = $id;
@@ -183,6 +200,36 @@ class BranchController extends ActiveController
         }
         
         if($model->save())
+            return $model;
+        else
+            throw new \yii\web\HttpException(422, json_encode($model));
+    }
+
+    public function actionInventoryUpdate ($id)
+    {
+        $request = Yii::$app->request;
+        $this->branchCheckAccess($id);
+
+        $product_id = $request->getBodyParam('product_id');
+        $model = Inventory::find()->where(['branch_id' => $id, 'product_id' => $product_id])->one();
+        foreach ($this->save_keys_inventory as $key) {
+            # code...
+            $model->$key = $request->getBodyParam($key);
+        }
+         if($model->save())
+            return $model;
+        else
+            throw new \yii\web\HttpException(422, json_encode($model));
+    }
+
+    public  function actionInventoryDelete($id)
+    {
+        $request = Yii::$app->request;
+        $this->branchCheckAccess($id);
+
+        $product_id = $request->getBodyParam('product_id');
+        $model = Inventory::find()->where(['branch_id' => $id, 'product_id' => $product_id])->one();
+          if($model->delete())
             return $model;
         else
             throw new \yii\web\HttpException(422, json_encode($model));

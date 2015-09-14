@@ -40,7 +40,7 @@ $config = [
         'urlManager' => [
             'enablePrettyUrl' => true,
             /*'enableStrictParsing' => true,*/
-            'showScriptName' => false,
+            //'showScriptName' => false,
             'rules' => [
                 [
                     'class' => 'yii\rest\UrlRule', 'controller' => 'brand',
