@@ -4,6 +4,7 @@ use Yii;
 use app\models\Brand;
 use app\models\Branch;
 use app\models\Inventory;
+use app\models\Employee;
 
 use yii\rest\ActiveController;
 use yii\web\Request ;
@@ -19,7 +20,7 @@ class BranchController extends ActiveController
     public $brand_free_actions = ['index', 'create'];
     public $save_keys = ['name', 'description', 'address', 'district', 'province', 'zipcode'];
     public $save_keys_inventory = ['count', 'product_id'];
-
+    public $save_keys_employee = [ 'name', 'surname', 'password'];
      public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -158,7 +159,7 @@ class BranchController extends ActiveController
         $token = $request->get(self::TOKEN_NAME);
         $brand = Brand::findIdentityByAccessToken($token);   
 
-        $branch = Brand::findOne($branch_id);
+        $branch = Branch::findOne($branch_id);
 
         if(Brand::isGodToken($token))
         {
@@ -166,7 +167,7 @@ class BranchController extends ActiveController
         }else if(!isset($brand) )
             throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not brand)");
         else if(!isset($branch) )
-            throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not Model) :".$request->getUrl());
+            throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not Model) : id =>".$branch_id);
         else if( $branch->brand_id != $brand->id)
             throw  new \yii\web\HttpException(403, "you shall not pass fcker!");
     }
@@ -205,14 +206,74 @@ class BranchController extends ActiveController
             throw new \yii\web\HttpException(422, json_encode($model));
     }
 
-    public function actionInventoryUpdate ($id)
+
+     public function actionInventoryGet ($id, $product_id)
+    {
+        $request = Yii::$app->request;
+        $this->branchCheckAccess($id);
+        $model = Inventory::find()->where(['branch_id' => $id, 'product_id' => $product_id])->one();
+        return $model;
+    }
+
+    public function actionInventoryUpdate ($id, $product_id)
+    {
+        $request = Yii::$app->request;
+        $this->branchCheckAccess($id);
+        $model = Inventory::find()->where(['branch_id' => $id, 'product_id' => $product_id])->one();
+        $model->count = $request->getBodyParam('count');
+         if($model->save())
+            return $model;
+        else
+            throw new \yii\web\HttpException(422, "id {$id} product_id {$product_id}");
+    }
+
+    public  function actionInventoryDelete($id, $product_id)
     {
         $request = Yii::$app->request;
         $this->branchCheckAccess($id);
 
-        $product_id = $request->getBodyParam('product_id');
+        //$product_id = $request->getBodyParam('product_id');;
         $model = Inventory::find()->where(['branch_id' => $id, 'product_id' => $product_id])->one();
-        foreach ($this->save_keys_inventory as $key) {
+        if($model->delete())
+            return $model;
+        else
+            throw new \yii\web\HttpException(422, json_encode($model));
+    }
+
+    /*
+    * Employee
+    */
+
+    public function actionEmployeeIndex($branch_id)
+    {
+        $this->branchCheckAccess($branch_id);
+        $model = Employee::find()->where(['branch_id' => $branch_id])->all();
+        return $model;
+    }
+
+    public function actionEmployeeCreate($branch_id)
+    {
+        $request = Yii::$app->request;
+        $this->branchCheckAccess($branch_id);
+        $model = new Employee();
+        $model->branch_id = $branch_id;
+        foreach ($this->save_keys_employee as $key) {
+            # code...
+            $model->$key = $request->getBodyParam($key);
+        }
+        
+        if($model->save())
+            return $model;
+        else
+            throw new \yii\web\HttpException(422, json_encode($model));
+    }
+
+    public function actionEmployeeUpdate($branch_id, $employee_id)
+    {
+        $request = Yii::$app->request;
+        $this->branchCheckAccess($branch_id);
+        $model = Employee::find()->where(['branch_id' => $branch_id, 'id' => $employee_id])->one();
+        foreach ($this->save_keys_employee as $key) {
             # code...
             $model->$key = $request->getBodyParam($key);
         }
@@ -222,18 +283,24 @@ class BranchController extends ActiveController
             throw new \yii\web\HttpException(422, json_encode($model));
     }
 
-    public  function actionInventoryDelete($id)
+    public function actionEmployeeDelete($branch_id, $employee_id)
     {
-        $request = Yii::$app->request;
-        $this->branchCheckAccess($id);
-
-        $product_id = $request->getBodyParam('product_id');
-        $model = Inventory::find()->where(['branch_id' => $id, 'product_id' => $product_id])->one();
-          if($model->delete())
+        $this->branchCheckAccess($branch_id);
+        $model = Employee::find()->where(['branch_id' => $branch_id, 'id' => $employee_id])->one();
+         if($model->delete())
             return $model;
         else
             throw new \yii\web\HttpException(422, json_encode($model));
     }
+
+    public function actionEmployeeGet($branch_id, $employee_id)
+    {
+        $this->branchCheckAccess($branch_id);
+        $model = Employee::find()->where(['branch_id' => $branch_id, 'id' => $employee_id])->one();
+        return $model;
+    }
+
+
 
 }
 

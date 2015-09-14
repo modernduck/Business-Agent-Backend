@@ -33,7 +33,7 @@ class Employee extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['branch_id', 'name', 'surname', 'password', 'update_time'], 'required'],
+            [['branch_id', 'name', 'surname', 'password'], 'required'],
             [['branch_id'], 'integer'],
             [['password'], 'string'],
             [['create_time', 'update_time'], 'safe'],
@@ -63,5 +63,11 @@ class Employee extends \yii\db\ActiveRecord
     public function getBranch()
     {
         return $this->hasOne(Branch::className(), ['id' => 'branch_id']);
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->update_time = date('Y-m-d H:i:s');
+        return parent::beforeSave($insert);
     }
 }
