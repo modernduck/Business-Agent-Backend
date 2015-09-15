@@ -40,7 +40,7 @@ $config = [
         'urlManager' => [
             'enablePrettyUrl' => true,
             /*'enableStrictParsing' => true,*/
-            //'showScriptName' => false,
+            'showScriptName' => false,
             'rules' => [
                 [
                     'class' => 'yii\rest\UrlRule', 'controller' => 'brand',
@@ -56,13 +56,20 @@ $config = [
                             
                             'GET {id}/inventories' => 'inventory-index',
                             'POST {id}/inventories' => 'inventory-create',
-                            'PUT {id}/inventories/{productId}' => 'inventory-update',
-                            'DELETE {id}/inventories/{productId}' => 'inventory-delete',
-                            'GET {id}/employees' => 'check',
+                            'GET <id:\d+>/inventories/<product_id:\d+>' => 'inventory-get',
+                            'PUT <id:\d+>/inventories/<product_id:\d+>' => 'inventory-update',
+                            'DELETE <id:\d+>/inventories/<product_id:\d+>' => 'inventory-delete',
+                            'GET <branch_id:\d+>/employees' => 'employee-index',
+                            'POST <branch_id:\d+>/employees' => 'employee-create',
+                            'GET <branch_id:\d+>/employees/<employee_id:\d+>' => 'employee-get',
+                            'PUT <branch_id:\d+>/employees/<employee_id:\d+>' => 'employee-update',
+                            'DELETE <branch_id:\d+>/employees/<employee_id:\d+>' => 'employee-delete',
+                            
                     ],
                 ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'product-type'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'product'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'sale'],
             ],
         ],
         'user' => [
