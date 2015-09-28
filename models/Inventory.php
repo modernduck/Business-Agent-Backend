@@ -41,7 +41,9 @@ class Inventory extends \yii\db\ActiveRecord
             // field name is the same as the attribute name
             'count',
             'product',
-
+            'product_type' => function($model){
+                return $this->product->productType->name;
+            },
         ];
     }
 
@@ -72,6 +74,9 @@ class Inventory extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Product::className(), ['id' => 'product_id']);
     }
+
+
+
 
     public function beforeSave($insert)
     {

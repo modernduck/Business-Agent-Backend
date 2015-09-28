@@ -70,4 +70,23 @@ class Employee extends \yii\db\ActiveRecord
         $this->update_time = date('Y-m-d H:i:s');
         return parent::beforeSave($insert);
     }
+
+    public static function encodePassword($password, $salt)
+    {
+        return base64_encode($password.$salt);
+    }
+
+    public function getToken()
+    {
+        $key = self::encodePassword($this->password, time());
+        $key = substr($key, count($key) - 10);
+        return $key.self::SPLITER.time().SELF::IDSPLITTER.$this->id;
+    }
+
+    public static function isValidToken($token)
+    {
+
+    }
+
+    
 }

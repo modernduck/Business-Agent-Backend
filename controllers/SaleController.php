@@ -10,6 +10,7 @@ use yii\rest\ActiveController;
 use yii\web\Request ;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
+use yii\filters\Cors;
 use yii\web\Response;
 
 class SaleController extends ActiveController
@@ -38,6 +39,16 @@ class SaleController extends ActiveController
                         'application/xml' => Response::FORMAT_XML,
                     ],
                 ];
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+            'cors' => [
+                'Origin' => ['*'],
+                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                'Access-Control-Request-Headers' => ['*'],
+                'Access-Control-Allow-Credentials' => true,
+                'Access-Control-Max-Age' => 86400,
+            ],
+        ];
         return $behaviors;
 
     }
@@ -102,9 +113,14 @@ class SaleController extends ActiveController
         if($result !== null)
             return $result;
         else
-            throw new \yii\web\HttpException(422, "Cant be sold abort transection");
-        
-            
+            throw new \yii\web\HttpException(422, "Cant be sold abort transection");       
+    }
+
+    public function actionPos()
+    {
+        //authen with employee token
+        //make an sale
+        //save in log
     }
 
     public function checkAccess($action, $model = null, $params = [])

@@ -45,6 +45,7 @@ $config = [
                 [
                     'class' => 'yii\rest\UrlRule', 'controller' => 'brand',
                     'extraPatterns' => [
+                            'GET token-by-email' => 'token-by-email',
                             'GET {id}/token' => 'token',
                             'GET {id}/check' => 'check',
                     ],
@@ -58,6 +59,8 @@ $config = [
                             'POST {id}/inventories' => 'inventory-create',
                             'GET <id:\d+>/inventories/<product_id:\d+>' => 'inventory-get',
                             'PUT <id:\d+>/inventories/<product_id:\d+>' => 'inventory-update',
+                            'OPTIONS <id:\d+>/inventories' => 'inventory-index',
+                            'OPTIONS <id:\d+>/inventories/<product_id:\d+>' => 'inventory-update',
                             'DELETE <id:\d+>/inventories/<product_id:\d+>' => 'inventory-delete',
                             'GET <branch_id:\d+>/employees' => 'employee-index',
                             'POST <branch_id:\d+>/employees' => 'employee-create',
@@ -68,7 +71,14 @@ $config = [
                     ],
                 ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'product-type'],
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'product'],
+                [
+                    'class' => 'yii\rest\UrlRule', 'controller' => 'product',
+                    'extraPatterns' => [
+                        'POST <id:\d+>/upload' => 'upload',
+                        'OPTIONS <id:\d+>/upload' => 'upload',
+                        'GET  <id:\d+>/test' => 'test',
+                    ]
+                ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'sale'],
             ],
         ],

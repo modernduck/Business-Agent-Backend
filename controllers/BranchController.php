@@ -10,13 +10,14 @@ use yii\rest\ActiveController;
 use yii\web\Request ;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
+use yii\filters\Cors;
 use yii\web\Response;
 
 class BranchController extends ActiveController
 {
     public $modelClass = 'app\models\Branch';
     const TOKEN_NAME = 'token';
-    public $checkActions = [   'update', 'view'];
+    public $checkActions = [   'update'];
     public $brand_free_actions = ['index', 'create'];
     public $save_keys = ['name', 'description', 'address', 'district', 'province', 'zipcode'];
     public $save_keys_inventory = ['count', 'product_id'];
@@ -39,6 +40,16 @@ class BranchController extends ActiveController
                         'application/xml' => Response::FORMAT_XML,
                     ],
                 ];
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+            'cors' => [
+                'Origin' => ['*'],
+                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                'Access-Control-Request-Headers' => ['*'],
+                'Access-Control-Allow-Credentials' => true,
+                'Access-Control-Max-Age' => 86400,
+            ],
+        ];
         return $behaviors;
 
     }
@@ -49,11 +60,21 @@ class BranchController extends ActiveController
         // disable the "delete" and "create" actions
         unset( $actions['create']);
         unset( $actions['delete']);
+//        unset( $actions['get']);
 
         // customize the data provider preparation with the "prepareDataProvider()" method
         $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
         
         return $actions;
+    }
+
+    public function actionGet($id)
+    {
+        $model = $this->findModel($id);
+        if($model !== null)
+            return $model;
+        else
+            throw new \yii\web\HttpException(422, "Model not found");
     }
 
     public function actionDelete($id)
@@ -146,7 +167,7 @@ class BranchController extends ActiveController
                 }else if(!isset($brand) )
                     throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not brand)");
                 else if(!isset($model2) )
-                    throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not Model) :".$request->getUrl());
+                    throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not Model) id:{$id} :".$request->getUrl());
                 else if( $brand->id != $model->brand_id)
                     throw  new \yii\web\HttpException(403, "you shall not pass fcker!");
             }
@@ -203,7 +224,7 @@ class BranchController extends ActiveController
         if($model->save())
             return $model;
         else
-            throw new \yii\web\HttpException(422, json_encode($model));
+            throw new \yii\web\HttpException(422, json_encode($request));
     }
 
 

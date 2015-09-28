@@ -6,6 +6,7 @@ use app\models\Brand;
 use yii\web\Request ;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
+use yii\filters\Cors;
 use yii\web\Response;
 use yii\filters\AccessControl;
 class BrandController extends ActiveController
@@ -32,6 +33,16 @@ class BrandController extends ActiveController
 		                'application/xml' => Response::FORMAT_XML,
 		            ],
                 ];
+         $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+            'cors' => [
+                'Origin' => ['*'],
+                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                'Access-Control-Request-Headers' => ['*'],
+                'Access-Control-Allow-Credentials' => true,
+                'Access-Control-Max-Age' => 86400,
+            ],
+        ];
     	return $behaviors;
 
     }
@@ -68,45 +79,61 @@ class BrandController extends ActiveController
     {
     	$brand = Brand::findIdentityByAccessToken($_GET[self::TOKEN_NAME]);	
     	if($brand!== null)
-    		$result = $brand;
+    		return array(
+                "result" => "success",
+                "data" => $brand,
+                "token" => $_GET[self::TOKEN_NAME]
+            );
     	else
-    		$result = "failed";
-    	return array(
-    		"result" => $result,
-    		"token" => $_GET[self::TOKEN_NAME]
-    	);
+    		return array(
+                "result" => "failed",
+                "token" => $_GET[self::TOKEN_NAME]
+            );
+    	
+    }
+
+    public function _getToken($brand)
+    {
+        if(isset($brand))
+        {   
+            $token = $brand->password;
+            if(isset($_GET['password']) && Brand::encodePassword($_GET['password'], $brand->name) == $token)
+                return array(
+                    "result" => "success",
+                    "data" => array(
+                        "id" => $brand->id,
+                        "token" => $brand->getToken()
+                    ),
+                );
+            return array(
+                "result" => "error",
+                "data" => array(
+                    "message" => "Wrong authenticate or password is missing",
+                    "password" => $_GET['password'],
+                    "date" => time()    
+                    
+                ),
+            );
+
+        }
+        return array(
+            "result" => "error",
+            "data" => array(
+                "message" => "Brand Not found"
+            ),
+        );
+    }
+
+    public function actionTokenByEmail($email)
+    {
+        $brand = Brand::find()->where(['owner_email' => $email])->one();
+        return $this->_getToken($brand);
     }
 
     public function actionToken($id)
     {
     	$brand = Brand::findOne($id);
-    	if(isset($brand))
-    	{	
-    		$token = $brand->password;
-    		if(isset($_GET['password']) && Brand::encodePassword($_GET['password'], $brand->name) == $token)
-	    		return array(
-	    			"result" => "success",
-	    			"data" => array(
-	    				"token" => $brand->getToken()
-	    			),
-	    		);
-	    	return array(
-	    		"result" => "error",
-	    		"data" => array(
-	    			"message" => "Wrong authenticate or password is missing",
-	    			"password" => $_GET['password'],
-	    			"date" => time()	
-	    			
-	    		),
-	    	);
-
-    	}
-    	return array(
-    		"result" => "error",
-    		"data" => array(
-    			"message" => "Brand Not found"
-    		),
-    	);
+    	return $this->_getToken($brand);
     }
 
    

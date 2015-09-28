@@ -7,13 +7,14 @@ use yii\rest\ActiveController;
 use yii\web\Request ;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
+use yii\filters\Cors;
 use yii\web\Response;
 
 class ProductTypeController extends ActiveController
 {
     public $modelClass = 'app\models\ProductType';
     const TOKEN_NAME = 'token';
-    public $checkActions = [   'update', 'view'];
+    public $checkActions = [   'update'];
     public $brand_free_actions = ['index', 'create'];
      public function behaviors()
     {
@@ -33,6 +34,16 @@ class ProductTypeController extends ActiveController
 		                'application/xml' => Response::FORMAT_XML,
 		            ],
                 ];
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+            'cors' => [
+                'Origin' => ['*'],
+                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                'Access-Control-Request-Headers' => ['*'],
+                'Access-Control-Allow-Credentials' => true,
+                'Access-Control-Max-Age' => 86400,
+            ],
+        ];
     	return $behaviors;
 
     }

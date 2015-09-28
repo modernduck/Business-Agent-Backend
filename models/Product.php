@@ -45,6 +45,28 @@ class Product extends \yii\db\ActiveRecord
         ];
     }
 
+     public function fields()
+    {
+        return [
+            // field name is the same as the attribute name
+            'id',
+            'name',
+            // field name is "email", the corresponding attribute name is "email_address"
+            
+            'product_type' => function($model)
+            {
+                return $model->productType->name;
+            },
+            'product_type_id',
+            // field name is "name", its value is defined by a PHP callback
+            'price',
+            'description',
+            'image',
+            'create_time'
+        ];
+    }
+
+
     /**
      * @inheritdoc
      */

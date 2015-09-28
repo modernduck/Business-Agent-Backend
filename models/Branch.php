@@ -52,6 +52,27 @@ class Branch extends \yii\db\ActiveRecord
         ];
     }
 
+    public function fields()
+    {
+        return [
+            'id',
+            'name',
+             'brand_id', 
+            'description',
+            'address',
+            'district',
+            'province',
+            'zipcode',
+            'employeesCount',
+            'inventoriesCount',
+        ];
+    }
+
+    public function extraFields()
+    {
+        return ['inventories','employees'];
+    }
+
     /**
      * @inheritdoc
      */
@@ -87,6 +108,11 @@ class Branch extends \yii\db\ActiveRecord
         return $this->hasMany(Employee::className(), ['branch_id' => 'id']);
     }
 
+    public function getEmployeesCount()
+    {
+        return $this->hasMany(Employee::className(), ['branch_id' => 'id'])->count();   
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -94,6 +120,19 @@ class Branch extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Inventory::className(), ['branch_id' => 'id']);
     }
+
+      public function getInventoriesCount()
+    {
+        // Customer has_many Order via Order.customer_id -> id
+        $inventories = $this->inventories;
+        $count = 0;
+        foreach ($inventories as $item) {
+            # code...
+            $count += $item->count;
+        }
+        return $count;
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
