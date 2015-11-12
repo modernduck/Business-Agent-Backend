@@ -127,6 +127,10 @@ class Brand extends \yii\db\ActiveRecord implements IdentityInterface
         if( count($data) != 2)
             return null;
         $key = $data[0];
+        $old_time = $data[1];
+        $diff_time = (time() - $old_time) ;
+        if($diff_time >= self::TIMELIMIT)
+            return null;
         //decode from url
         $key = urldecode($key);
         $key_time = $data[1];

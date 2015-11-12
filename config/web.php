@@ -48,6 +48,9 @@ $config = [
                             'GET token-by-email' => 'token-by-email',
                             'GET {id}/token' => 'token',
                             'GET {id}/check' => 'check',
+                            'GET test' => 'test',
+                            'GET {id}/config' => 'config',
+                            'GET {id}/import' => 'import',
                     ],
                     
                 ],
@@ -63,10 +66,12 @@ $config = [
                             'OPTIONS <id:\d+>/inventories/<product_id:\d+>' => 'inventory-update',
                             'DELETE <id:\d+>/inventories/<product_id:\d+>' => 'inventory-delete',
                             'GET <branch_id:\d+>/employees' => 'employee-index',
+                            'OPTIONS <branch_id:\d+>/employees' => 'employee-index',
                             'POST <branch_id:\d+>/employees' => 'employee-create',
                             'GET <branch_id:\d+>/employees/<employee_id:\d+>' => 'employee-get',
                             'PUT <branch_id:\d+>/employees/<employee_id:\d+>' => 'employee-update',
                             'DELETE <branch_id:\d+>/employees/<employee_id:\d+>' => 'employee-delete',
+
                             
                     ],
                 ],
@@ -80,6 +85,15 @@ $config = [
                     ]
                 ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'sale'],
+                [
+                    'class' => 'yii\rest\UrlRule', 'controller' => 'pos',
+                    'extraPatterns' => [
+                        'GET branches/<brand_id:\d+>' => 'branch',
+                        'GET authen/<branch_id:\d+>' => 'authen',
+                        'GET token' => 'token',
+                        'GET inventories' => 'inventories',
+                    ]
+                ],
             ],
         ],
         'user' => [

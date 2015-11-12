@@ -2,6 +2,7 @@
 namespace app\controllers;
 use Yii;
 use app\models\Brand;
+use app\models\BrandConfig;
 use app\models\Branch;
 use app\models\Inventory;
 use app\models\Employee;
@@ -21,7 +22,7 @@ class BranchController extends ActiveController
     public $brand_free_actions = ['index', 'create'];
     public $save_keys = ['name', 'description', 'address', 'district', 'province', 'zipcode'];
     public $save_keys_inventory = ['count', 'product_id'];
-    public $save_keys_employee = [ 'name', 'surname', 'password'];
+    public $save_keys_employee = [ 'name', 'password'];
      public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -122,6 +123,8 @@ class BranchController extends ActiveController
         // prepare and return a data provider for the "index" action
         $token = $request->get(self::TOKEN_NAME);
         $brand = Brand::findIdentityByAccessToken($token);
+        
+        
         return Branch::find()->where(['brand_id' => $brand->id])->all();
     }
 

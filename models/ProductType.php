@@ -74,4 +74,13 @@ class ProductType extends \yii\db\ActiveRecord
         $this->update_time = $this->update_time = date('Y-m-d H:i:s');
         return parent::beforeSave($insert);
     }
+
+    public static function isCreated($brand_id, $name)
+    {
+        $type = self::find()->where(['brand_id' => $brand_id, 'name' => $name])->one();
+        if($type !== null)
+            return true;
+        else
+            return false;
+    }
 }

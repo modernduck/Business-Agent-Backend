@@ -2,6 +2,7 @@
 namespace app\controllers;
 use Yii;
 use app\models\Brand;
+use app\models\BrandConfig;
 use app\models\ProductType;
 use app\models\Product;
 use yii\rest\ActiveController;
@@ -55,12 +56,15 @@ class ProductController extends ActiveController
         $actions = parent::actions();
         // disable the "delete" and "create" actions
         unset( $actions['create']);
+        //unset( $actions['update']);
         unset( $actions['delete']);
         // customize the data provider preparation with the "prepareDataProvider()" method
         $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
-
+        
         return $actions;
     }
+
+    
 
     public function actionDelete($id)
     {
@@ -90,10 +94,35 @@ class ProductController extends ActiveController
         $token = $request->get(self::TOKEN_NAME);
         $brand = Brand::findIdentityByAccessToken($token);
         $product_type_id = $request->get('product_type_id');
-        if(isset($product_type_id))
+
+       if(isset($product_type_id))
             return Product::find()->joinWith('productType')->where(['brand_id' => $brand->id, 'product_type_id' => $product_type_id])->all();
         else
             return Product::find()->joinWith('productType')->where(['brand_id' => $brand->id])->all();
+           
+    }
+
+    public function actionUpdate()
+    {
+        $request = Yii::$app->request;
+        $token = $request->get(self::TOKEN_NAME);
+        $brand = Brand::findIdentityByAccessToken($token);
+        $product_type_id = $request->getBodyParam('product_type_id');
+        $product = Product::findOne($request->getBodyParam('id'));
+        $product->name = $request->getBodyParam('name');
+        $product->product_type_id = $product_type_id;
+        $product->price = $request->getBodyParam('price');
+        $product->description = $request->getBodyParam('description');
+        $product->image = $request->getBodyParam('image');
+        if($product->save())
+        {
+            
+
+
+            return $product;
+        }else
+            throw new \yii\web\HttpException(422, json_encode($productType));
+           
     }
 
     public function actionCreate()

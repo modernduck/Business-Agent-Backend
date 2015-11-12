@@ -8,7 +8,7 @@ use Yii;
  * This is the model class for table "brand_config".
  *
  * @property integer $id
- * @property string $key
+ * @property string $name
  * @property string $value
  */
 class BrandConfig extends \yii\db\ActiveRecord
@@ -27,9 +27,9 @@ class BrandConfig extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['key', 'value'], 'required'],
+            [['name', 'value', 'brand_id'], 'required'],
             [['value'], 'string'],
-            [['key'], 'string', 'max' => 45]
+            [['name'], 'string', 'max' => 45]
         ];
     }
 
@@ -40,8 +40,18 @@ class BrandConfig extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'key' => 'Key',
+            'brand_id' => 'Brand ID',
+            'name' => 'name',
             'value' => 'Value',
         ];
+    }
+
+    public static function get($brand_id, $name)
+    {
+        $config = self::find()->where(['brand_id' => $brand_id, 'name' => $name])->one();
+        if($config == null)
+            return null;
+        else
+            return $config->value;
     }
 }
