@@ -7,6 +7,7 @@ use app\models\Product;
 use app\models\ProductType;
 use app\models\ProductMeta;
 use app\models\BrandConfig;
+use app\models\Woocommerce;
 use yii\web\Request ;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
@@ -188,7 +189,7 @@ class BrandController extends ActiveController
          //$brand_configs = BrandConfig::find()->where(['brand_id' => $id])->all();
          if(BrandConfig::get($id, 'is_connect_woocommerce'))
         {
-            $options = array(
+            /*$options = array(
                 'debug'           => true,
                 'return_as_array' => false,
                 'validate_url'    => false,
@@ -199,7 +200,13 @@ class BrandController extends ActiveController
 
             $items = $client->products->get();
 
-            return $items;
+
+            return $items;*/
+            $url = BrandConfig::get($id, 'woocommerce_url_2');
+            $user = BrandConfig::get($id, 'woocommerce_user');
+            $password = BrandConfig::get($id, 'woocommerce_password');
+            $helper = new Woocommerce("{$url}/xmlrpc.php", $user, $password);
+            return $helper->getCategory("hello");
         }else
         return "in valid";
 

@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "479407875c975e7dbee0aefcb85e62d5",
+    "hash": "d057a07ce5905c827718c6eb1e4dac7c",
+    "content-hash": "dc55f233e0355a9a40d30979439c5e73",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -317,6 +318,112 @@
             "time": "2013-11-30 08:25:19"
         },
         {
+            "name": "hieu-le/wordpress-xmlrpc-client",
+            "version": "2.4.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/letrunghieu/wordpress-xmlrpc-client.git",
+                "reference": "db10187fff1c89eaa51fb9d02a05afa7c62a70fe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/letrunghieu/wordpress-xmlrpc-client/zipball/db10187fff1c89eaa51fb9d02a05afa7c62a70fe",
+                "reference": "db10187fff1c89eaa51fb9d02a05afa7c62a70fe",
+                "shasum": ""
+            },
+            "require": {
+                "ext-xmlrpc": "*",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
+                "illuminate/support": "~4.0",
+                "php-vcr/php-vcr": "dev-master",
+                "php-vcr/phpunit-testlistener-vcr": "*",
+                "phpunit/phpunit": "*",
+                "symfony/yaml": "2.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "HieuLe\\WordpressXmlrpcClient\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hieu Le",
+                    "email": "letrunghieu.cse09@gmail.com",
+                    "homepage": "http://www.hieule.info"
+                }
+            ],
+            "description": "A PHP client for Wordpress websites that closely implement the XML-RPC WordPress API with full test suite built in",
+            "keywords": [
+                "api",
+                "client",
+                "remote",
+                "wordpress",
+                "xmlrpc"
+            ],
+            "time": "2015-10-05 05:57:46"
+        },
+        {
+            "name": "monitorbacklinks/yii2-wordpress",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/monitorbacklinks/yii2-wordpress.git",
+                "reference": "c52ba4d65bd8875721a178f4ef666f30595a84a5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/monitorbacklinks/yii2-wordpress/zipball/c52ba4d65bd8875721a178f4ef666f30595a84a5",
+                "reference": "c52ba4d65bd8875721a178f4ef666f30595a84a5",
+                "shasum": ""
+            },
+            "require": {
+                "ext-xmlrpc": "*",
+                "hieu-le/wordpress-xmlrpc-client": "~2.0",
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "*"
+            },
+            "require-dev": {
+                "codeception/codeception": "~2.0"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "monitorbacklinks\\yii2wp\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ivan Koptiev",
+                    "email": "ivan@monitorbacklinks.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Yii2 component for integration with Wordpress CMS via XML-RPC API",
+            "homepage": "http://monitorbacklinks.github.io/yii2-wordpress/",
+            "keywords": [
+                "integration",
+                "wordpress",
+                "wp",
+                "xml-rpc",
+                "xmlrpc",
+                "yii",
+                "yii2"
+            ],
+            "time": "2015-04-24 15:24:09"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "v5.4.1",
             "source": {
@@ -459,21 +566,21 @@
         },
         {
             "name": "yiisoft/yii2-bootstrap",
-            "version": "2.0.4",
+            "version": "2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-bootstrap.git",
-                "reference": "1b6b1e61cf91c3cdd517d6a7e71d30bb212e4af0"
+                "reference": "1464f93834b1d5edb1f5625f7ffd6c3723fa4923"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-bootstrap/zipball/1b6b1e61cf91c3cdd517d6a7e71d30bb212e4af0",
-                "reference": "1b6b1e61cf91c3cdd517d6a7e71d30bb212e4af0",
+                "url": "https://api.github.com/repos/yiisoft/yii2-bootstrap/zipball/1464f93834b1d5edb1f5625f7ffd6c3723fa4923",
+                "reference": "1464f93834b1d5edb1f5625f7ffd6c3723fa4923",
                 "shasum": ""
             },
             "require": {
                 "bower-asset/bootstrap": "3.3.* | 3.2.* | 3.1.*",
-                "yiisoft/yii2": ">=2.0.4"
+                "yiisoft/yii2": ">=2.0.6"
             },
             "type": "yii2-extension",
             "extra": {
@@ -505,7 +612,7 @@
                 "bootstrap",
                 "yii2"
             ],
-            "time": "2015-05-10 22:08:17"
+            "time": "2015-09-23 17:48:24"
         },
         {
             "name": "yiisoft/yii2-composer",
@@ -766,16 +873,16 @@
         },
         {
             "name": "yiisoft/yii2-debug",
-            "version": "2.0.4",
+            "version": "2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-debug.git",
-                "reference": "5c7081b2be71c61d3a50d978b31edc3e0b6f2f97"
+                "reference": "1b302e67521d46feb2413d9d96ca94ed82b39b0e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/5c7081b2be71c61d3a50d978b31edc3e0b6f2f97",
-                "reference": "5c7081b2be71c61d3a50d978b31edc3e0b6f2f97",
+                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/1b302e67521d46feb2413d9d96ca94ed82b39b0e",
+                "reference": "1b302e67521d46feb2413d9d96ca94ed82b39b0e",
                 "shasum": ""
             },
             "require": {
@@ -809,7 +916,7 @@
                 "debugger",
                 "yii2"
             ],
-            "time": "2015-05-10 22:08:56"
+            "time": "2015-08-06 16:14:06"
         },
         {
             "name": "yiisoft/yii2-faker",
@@ -914,7 +1021,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "monitorbacklinks/yii2-wordpress": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

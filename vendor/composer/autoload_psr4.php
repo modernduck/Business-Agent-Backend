@@ -14,6 +14,8 @@ return array(
     'yii\\codeception\\' => array($vendorDir . '/yiisoft/yii2-codeception'),
     'yii\\bootstrap\\' => array($vendorDir . '/yiisoft/yii2-bootstrap'),
     'yii\\' => array($vendorDir . '/yiisoft/yii2'),
+    'monitorbacklinks\\yii2wp\\' => array($vendorDir . '/monitorbacklinks/yii2-wordpress'),
     'cebe\\markdown\\' => array($vendorDir . '/cebe/markdown'),
+    'HieuLe\\WordpressXmlrpcClient\\' => array($vendorDir . '/hieu-le/wordpress-xmlrpc-client/src'),
     'Faker\\' => array($vendorDir . '/fzaninotto/faker/src/Faker'),
 );

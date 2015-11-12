@@ -72,7 +72,37 @@ class ProductType extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         $this->update_time = $this->update_time = date('Y-m-d H:i:s');
+        if(BrandConfig::get($this->brand_id, 'is_connect_woocommerce'))
+        {
+            $url = BrandConfig::get($this->brand_id, 'woocommerce_url_2');
+            $user = BrandConfig::get($this->brand_id, 'woocommerce_user');
+            $password = BrandConfig::get($this->brand_id, 'woocommerce_password');
+            $helper = new Woocommerce("{$url}/xmlrpc.php", $user, $password);
+            if($insert)
+                $helper->ensureCategory($this->name);
+            else
+            {
+                $test = self::findOne($this->id);
+                $helper->changeCategoryName($test->name, $this->name);
+            }
+
+        }
+
         return parent::beforeSave($insert);
+    }
+
+    public function beforeDelete()
+    {
+         if(BrandConfig::get($this->brand_id, 'is_connect_woocommerce'))
+        {
+            $url = BrandConfig::get($this->brand_id, 'woocommerce_url_2');
+            $user = BrandConfig::get($this->brand_id, 'woocommerce_user');
+            $password = BrandConfig::get($this->brand_id, 'woocommerce_password');
+            $helper = new Woocommerce("{$url}/xmlrpc.php", $user, $password);
+            $helper->deleteCategory($this->name);
+        }
+        
+        return parent::beforeDelete();
     }
 
     public static function isCreated($brand_id, $name)

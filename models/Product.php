@@ -126,12 +126,23 @@ class Product extends \yii\db\ActiveRecord
         return $this->hasMany(Sale::className(), ['id' => 'sale_id'])->viaTable('sale_has_product', ['product_id' => 'id']);
     }
 
-    public function getWooObject()
+    public function getWooObject($product_type)
     {
         $answer = array();
         $answer['regular_price'] = $this->price;
         $answer['description'] = $this->description;
         $answer['title'] = $this->name;
+
+        $url = BrandConfig::get($product_type->brand_id, 'woocommerce_url_2');
+        $user = BrandConfig::get($product_type->brand_id, 'woocommerce_user');
+        $password = BrandConfig::get($product_type->brand_id, 'woocommerce_password');
+        $helper = new Woocommerce("{$url}/xmlrpc.php", $user, $password);
+        
+        $woo_category  =  $helper->getCategory($product_type->name);
+            
+
+        $answer['categories'] = array();
+        array_push($answer['categories'], $woo_category['term_id']);
         /*
          "images": [
       {
@@ -153,37 +164,7 @@ class Product extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
 
-        $product_type = ProductType::findOne($this->product_type_id);
-        if(BrandConfig::get( $product_type->brand_id, 'is_connect_woocommerce'))
-        {
-            $options = array(
-                'debug'           => true,
-                'return_as_array' => false,
-                'validate_url'    => false,
-                'timeout'         => 30,
-                'ssl_verify'      => false,
-            );
-            $client = new \WC_API_Client( BrandConfig::get( $product_type->brand_id, 'woocommerce_url'), BrandConfig::get( $product_type->brand_id, 'woocommerce_key'), BrandConfig::get($product_type->brand_id, 'woocommerce_secret'), $options );
-            $save_obj = $this->getWooObject();
-
-
-            //if is new Create
-            if($this->isNewRecord)
-            {
-             /*   $result = $client->products->create( $save_obj);
-                $pm =  new ProductMeta();
-                $pm->name = "woocommerce_id";
-                $pm->value = $result->product->id;
-                $pm->product_id = $this->id;
-                $pm->save();*/
-            }else
-            {
-                $woo_product_id = ProductMeta::get($this->id, "woocommerce_id");
-                $client->products->update( $woo_product_id, $save_obj ) ;
-            }
-            //else update
-
-        }
+      
         $this->update_time = date('Y-m-d H:i:s');
         
         return parent::beforeSave($insert);
@@ -202,7 +183,7 @@ class Product extends \yii\db\ActiveRecord
                 'ssl_verify'      => false,
             );
             $client = new \WC_API_Client( BrandConfig::get( $product_type->brand_id, 'woocommerce_url'), BrandConfig::get( $product_type->brand_id, 'woocommerce_key'), BrandConfig::get($product_type->brand_id, 'woocommerce_secret'), $options );
-            $save_obj = $this->getWooObject();
+            $save_obj = $this->getWooObject($product_type);
             if($insert)
             {
                 $result = $client->products->create( $save_obj);
@@ -214,9 +195,34 @@ class Product extends \yii\db\ActiveRecord
                     $pm->save();
                 else
                     throw  new \yii\web\HttpException(403, json_encode($pm->errors));
+            }else
+            {
+                $woo_product_id = ProductMeta::get($this->id, "woocommerce_id");
+                $client->products->update( $woo_product_id, $save_obj ) ;
             }
         }
         return parent::afterSave($insert, $changedAttributes );
+    }
+
+    public function beforeDelete()
+    {
+          $product_type = ProductType::findOne($this->product_type_id);
+        if(BrandConfig::get( $product_type->brand_id, 'is_connect_woocommerce'))
+        {
+              $options = array(
+                'debug'           => true,
+                'return_as_array' => false,
+                'validate_url'    => false,
+                'timeout'         => 30,
+                'ssl_verify'      => false,
+            );
+            $client = new \WC_API_Client( BrandConfig::get( $product_type->brand_id, 'woocommerce_url'), BrandConfig::get( $product_type->brand_id, 'woocommerce_key'), BrandConfig::get($product_type->brand_id, 'woocommerce_secret'), $options );
+            $woo_product_id = ProductMeta::get($this->id, "woocommerce_id");
+            $client->products->delete( $woo_product_id, true );
+        }
+
+
+        return parent::beforeDelete();
     }
 
 
