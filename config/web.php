@@ -51,6 +51,7 @@ $config = [
                             'GET test' => 'test',
                             'GET {id}/config' => 'config',
                             'GET {id}/import' => 'import',
+                            'GET {id}/import-sale' => 'import-sale',
                     ],
                     
                 ],

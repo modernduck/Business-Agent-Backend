@@ -56,10 +56,16 @@ class ProductType extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProducts()
+    /*public function getProducts()
     {
         return $this->hasMany(Product::className(), ['product_type_id' => 'id']);
+    }*/
+
+      public function getProducts()
+    {
+        return $this->hasMany(Product::className(), ['id' => 'product_id'])->viaTable('product_has_product_type', ['product_type_id' => 'id']);
     }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -113,4 +119,6 @@ class ProductType extends \yii\db\ActiveRecord
         else
             return false;
     }
+
+    
 }

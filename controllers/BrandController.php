@@ -27,7 +27,7 @@ class BrandController extends ActiveController
     	$behaviors['authenticator'] = [
                 'class' =>QueryParamAuth::className(),
                 'only' => $this->checkActions,
-                'except' => ['index',self::TOKEN_NAME, 'check', 'create' ,  'delete', 'config','import'],
+                'except' => ['index',self::TOKEN_NAME, 'check', 'create' ,  'delete', 'config','import', 'import-sale'],
                 'tokenParam' => self::TOKEN_NAME,
            ];
 
@@ -189,7 +189,7 @@ class BrandController extends ActiveController
          //$brand_configs = BrandConfig::find()->where(['brand_id' => $id])->all();
          if(BrandConfig::get($id, 'is_connect_woocommerce'))
         {
-            /*$options = array(
+            $options = array(
                 'debug'           => true,
                 'return_as_array' => false,
                 'validate_url'    => false,
@@ -198,17 +198,40 @@ class BrandController extends ActiveController
             );
             $client = new \WC_API_Client( BrandConfig::get($id, 'woocommerce_url'), BrandConfig::get($id, 'woocommerce_key'), BrandConfig::get($id, 'woocommerce_secret'), $options );
 
-            $items = $client->products->get();
-
-
-            return $items;*/
-            $url = BrandConfig::get($id, 'woocommerce_url_2');
+            $items_a = $client->products->get(null, array(
+                "filter"=> array(
+                    "limit" => 138
+                )
+            ));
+            return $items_a;
+            /*$url = BrandConfig::get($id, 'woocommerce_url_2');
             $user = BrandConfig::get($id, 'woocommerce_user');
             $password = BrandConfig::get($id, 'woocommerce_password');
             $helper = new Woocommerce("{$url}/xmlrpc.php", $user, $password);
-            return $helper->getCategory("hello");
+            return $helper->getCategory("hello");*/
         }else
         return "in valid";
+
+   }
+
+   public function actionImportSale($id)
+   {
+         if(BrandConfig::get($id, 'is_connect_woocommerce'))
+        {
+            $options = array(
+                'debug'           => true,
+                'return_as_array' => false,
+                'validate_url'    => false,
+                'timeout'         => 30,
+                'ssl_verify'      => false,
+            );
+            $client = new \WC_API_Client( BrandConfig::get($id, 'woocommerce_url'), BrandConfig::get($id, 'woocommerce_key'), BrandConfig::get($id, 'woocommerce_secret'), $options );
+            $orders = $client->orders->get(null, array(
+                "status" => "completed"
+            )); 
+
+            return $orders;
+        }
 
    }
 
@@ -225,7 +248,11 @@ class BrandController extends ActiveController
             );
             $client = new \WC_API_Client( BrandConfig::get($id, 'woocommerce_url'), BrandConfig::get($id, 'woocommerce_key'), BrandConfig::get($id, 'woocommerce_secret'), $options );
 
-            $items = $client->products->get();
+            $items = $client->products->get(null, array(
+                "filter"=> array(
+                    "limit" => 138
+                )
+            ));
 
 
             $message = array();
@@ -259,7 +286,10 @@ class BrandController extends ActiveController
                         $product_type->save();
                         array_push($message, "Add product type {$category_name} -> id {$product_type->id}");
                     }else
+                    
                         array_push($message, "need to find product id for {$category_name}");
+
+
                 }
                 $single_type = $product->categories[0];
                 $product_type = ProductType::find()->where(['name'=> $single_type])->one();
@@ -272,13 +302,17 @@ class BrandController extends ActiveController
                 if($p->save())
                 {
                     array_push($message, "add product {$p->name} -> id {$p->id}");
+
                     $product_meta = new ProductMeta();
                     $product_meta->product_id = $p->id;
                     $product_meta->name = "woocommerce_id";
                     $product_meta->value = $product->id."";
-                    $product_meta->save();
+
                     if(!$product_meta->validate())
                         array_push($message, json_encode($product_meta->errors));
+                    if(!(ProductMeta::find()->where(["product_id" => $p->id, "name"=> "woocommerce_id"])->one() != null))
+                        $product_meta->save();
+                    
 
                 }else
                     array_push($message, "cant insrt cause {$json} {$p->price} {$p->name} {$p->image} {$p->description} {$p->product_type_id} ");

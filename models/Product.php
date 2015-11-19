@@ -3,7 +3,7 @@
 namespace app\models;
 
 use Yii;
-
+use yii\db\Query;
 /**
  * This is the model class for table "product".
  *
@@ -58,6 +58,15 @@ class Product extends \yii\db\ActiveRecord
             {
                 return $model->productType->name;
             },
+            'product_types' => function($model)
+            {
+                $query = new Query;
+                $query->select('name,product_type_id')
+                    ->from('product_has_product_type')
+                    ->innerJoin("product_type", "product_type.id =  product_type_id")
+                    ;
+                return $query->all();
+            },
             'product_type_id',
             // field name is "name", its value is defined by a PHP callback
             'price',
@@ -106,6 +115,11 @@ class Product extends \yii\db\ActiveRecord
     public function getProductType()
     {
         return $this->hasOne(ProductType::className(), ['id' => 'product_type_id']);
+    }
+
+    public function getProductTypes()
+    {
+        return $this->hasMany(ProductType::className(), ['id' => 'product_type_id'])->viaTable('product_has_product_type', ['product_id' => 'id']);
     }
 
    
@@ -195,11 +209,14 @@ class Product extends \yii\db\ActiveRecord
                     $pm->save();
                 else
                     throw  new \yii\web\HttpException(403, json_encode($pm->errors));
+                //upload image
+                
             }else
             {
                 $woo_product_id = ProductMeta::get($this->id, "woocommerce_id");
                 $client->products->update( $woo_product_id, $save_obj ) ;
             }
+
         }
         return parent::afterSave($insert, $changedAttributes );
     }

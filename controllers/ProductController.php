@@ -18,7 +18,7 @@ class ProductController extends ActiveController
     public $modelClass = 'app\models\Product';
     const TOKEN_NAME = 'token';
     public $checkActions = [   'update', 'upload'];
-    public $brand_free_actions = ['index', 'create'];
+    public $brand_free_actions = ['index', 'create', 'add-type'];
      public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -141,17 +141,48 @@ class ProductController extends ActiveController
          
             $product =  new Product();
             $product->name = $request->getBodyParam('name');
+
+
             $product->product_type_id = $product_type_id;
+
+            
+
             $product->price = $request->getBodyParam('price');
             $product->description = $request->getBodyParam('description');
             $product->image = $request->getBodyParam('image');
         }else
                throw new \yii\web\HttpException(422, "not found any");
         if($product->save())
+        {
+            $product->link('productTypes', $productType);
             return $product;
-        else
+        }else
             throw new \yii\web\HttpException(422, json_encode($productType));
             
+    }
+
+    public function actionAddType()
+    {
+        $request = Yii::$app->request;
+        $token = $request->get(self::TOKEN_NAME);
+        $brand = Brand::findIdentityByAccessToken($token);
+        $product_type_id = $request->getBodyParam('product_type_id');
+        $product_id = $request->getBodyParam('product_id');
+        $productType = ProductType::find()->where([
+            'brand_id' => $brand->id, 
+            'id' => $product_type_id
+        ])->one();
+        $product = Product::findOne($product_id);
+        if($productType !== null && $product !== null)
+        {
+            $product->link('productTypes', $productType);
+            return array(
+                "status" => "success"
+
+            );
+
+        }else
+           throw new \yii\web\HttpException(422, "not found any");
     }
 
     public function actionTest($id)
@@ -172,9 +203,27 @@ class ProductController extends ActiveController
         $filename = $product->id.".".$ext;
         
         $destination = 'uploads/' . $filename;
+        /*$binaryData = file_get_contents($_FILES['file']['tmp_name']);
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $_FILES['file']['tmp_name']);
+        finfo_close($finfo);*/
         if(move_uploaded_file( $_FILES['file']['tmp_name'] , $destination ))
         {
             $product->image = Url::home(true).$destination;
+            /*if(BrandConfig::get($id, 'is_connect_woocommerce')){
+
+
+                $woo_product_id = ProductMeta::get($id, "woocommerce_id");
+
+
+                $url = BrandConfig::get($product_type->brand_id, 'woocommerce_url_2');
+                $user = BrandConfig::get($product_type->brand_id, 'woocommerce_user');
+                $password = BrandConfig::get($product_type->brand_id, 'woocommerce_password');
+                $helper = new Woocommerce("{$url}/xmlrpc.php", $user, $password);
+                $helper->uploadFile($product->id."-img", $mime, $binaryData, true, $woo_product_id);
+
+            }*/
+            
             if($product->save())
                 return array(
                     "result" => "success",
