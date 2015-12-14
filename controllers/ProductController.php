@@ -5,6 +5,8 @@ use app\models\Brand;
 use app\models\BrandConfig;
 use app\models\ProductType;
 use app\models\Product;
+use app\models\ProductMeta;
+use app\models\Woocommerce;
 use yii\rest\ActiveController;
 use yii\web\Request ;
 use yii\filters\auth\QueryParamAuth;
@@ -56,7 +58,7 @@ class ProductController extends ActiveController
         $actions = parent::actions();
         // disable the "delete" and "create" actions
         unset( $actions['create']);
-        //unset( $actions['update']);
+        unset( $actions['update']);
         unset( $actions['delete']);
         // customize the data provider preparation with the "prepareDataProvider()" method
         $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
@@ -96,9 +98,9 @@ class ProductController extends ActiveController
         $product_type_id = $request->get('product_type_id');
 
        if(isset($product_type_id))
-            return Product::find()->joinWith('productType')->where(['brand_id' => $brand->id, 'product_type_id' => $product_type_id])->all();
+            return Product::find()->joinWith('productTypes')->where(['brand_id' => $brand->id, 'product_type_id' => $product_type_id])->all();
         else
-            return Product::find()->joinWith('productType')->where(['brand_id' => $brand->id])->all();
+            return Product::find()->joinWith('productTypes')->where(['brand_id' => $brand->id])->all();
            
     }
 
@@ -107,19 +109,34 @@ class ProductController extends ActiveController
         $request = Yii::$app->request;
         $token = $request->get(self::TOKEN_NAME);
         $brand = Brand::findIdentityByAccessToken($token);
-        $product_type_id = $request->getBodyParam('product_type_id');
+        
         $product = Product::findOne($request->getBodyParam('id'));
         $product->name = $request->getBodyParam('name');
-        $product->product_type_id = $product_type_id;
+        $product->unlinkAll('productTypes');
+        $all = $request->getBodyParams();
+        //$product_types = print_r($all['product_types'], true);
+
+     
+        
         $product->price = $request->getBodyParam('price');
         $product->description = $request->getBodyParam('description');
         $product->image = $request->getBodyParam('image');
         if($product->save())
         {
-            
+            $product_types_ids = $all['product_types'];
+            foreach ($product_types_ids as $type_id) {
+                # code...
+                $product_type = ProductType::findOne($type_id);
+                $product_type->link('products', $product);
+            }
 
 
-            return $product;
+            return array(
+
+                'product'=>$product,
+                'types' => $all,
+                'params' => $request->getBodyParams()
+            );
         }else
             throw new \yii\web\HttpException(422, json_encode($productType));
            
@@ -203,31 +220,44 @@ class ProductController extends ActiveController
         $filename = $product->id.".".$ext;
         
         $destination = 'uploads/' . $filename;
-        /*$binaryData = file_get_contents($_FILES['file']['tmp_name']);
+        $binaryData = file_get_contents($_FILES['file']['tmp_name']);
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime = finfo_file($finfo, $_FILES['file']['tmp_name']);
-        finfo_close($finfo);*/
+        finfo_close($finfo);
         if(move_uploaded_file( $_FILES['file']['tmp_name'] , $destination ))
         {
-            $product->image = Url::home(true).$destination;
-            /*if(BrandConfig::get($id, 'is_connect_woocommerce')){
+            //$product->image = Url::home(true).$destination;
+           $product->image =  Url::to("@web/uploads/{$filename}", 'http');
+           $result = [];
+             //$woo_product_id = ProductMeta::get($id, "woocommerce_id");
+           //$params = array($product->id."-img", $mime, $binaryData, true, $woo_product_id);
+           $brand_id = $product->productTypes[0]->brand_id;
+            if(BrandConfig::get($brand_id, 'is_connect_woocommerce')){
 
 
                 $woo_product_id = ProductMeta::get($id, "woocommerce_id");
 
 
-                $url = BrandConfig::get($product_type->brand_id, 'woocommerce_url_2');
-                $user = BrandConfig::get($product_type->brand_id, 'woocommerce_user');
-                $password = BrandConfig::get($product_type->brand_id, 'woocommerce_password');
+                $url = BrandConfig::get($brand_id, 'woocommerce_url_2');
+                $user = BrandConfig::get($brand_id, 'woocommerce_user');
+                $password = BrandConfig::get($brand_id, 'woocommerce_password');
                 $helper = new Woocommerce("{$url}/xmlrpc.php", $user, $password);
-                $helper->uploadFile($product->id."-img", $mime, $binaryData, true, $woo_product_id);
+                $result = $helper->uploadFile($product->id, $mime, $binaryData, true, $woo_product_id);
+                return array(
+                    "result" => "success",
+                    "yo" => "man",
+                    "uploadResult" => $result
 
-            }*/
+                );
+            }
+            //uploadFile( string $name, string $mime, string $bits, boolean $overwrite = null, integer $postId = null )
             
             if($product->save())
                 return array(
                     "result" => "success",
-                    "data" => $product
+                    "data" => $product,
+                    'uploadResult' =>  $result,
+                    
                 );
             else
                 return array(

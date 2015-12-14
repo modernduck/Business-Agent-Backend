@@ -56,7 +56,12 @@ class Product extends \yii\db\ActiveRecord
             
             'product_type' => function($model)
             {
-                return $model->productType->name;
+                 $query = new Query;
+                $query->select('name,product_type_id')
+                    ->from('product_has_product_type')
+                    ->innerJoin("product_type", "product_type.id =  product_type_id")
+                    ->where(['product_has_product_type.product_id' => $model->id]);
+                return $query->one()['name'];
             },
             'product_types' => function($model)
             {
@@ -64,7 +69,7 @@ class Product extends \yii\db\ActiveRecord
                 $query->select('name,product_type_id')
                     ->from('product_has_product_type')
                     ->innerJoin("product_type", "product_type.id =  product_type_id")
-                    ;
+                    ->where(['product_has_product_type.product_id' => $model->id]);
                 return $query->all();
             },
             'product_type_id',
@@ -112,10 +117,10 @@ class Product extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProductType()
+  /*  public function getProductType()
     {
         return $this->hasOne(ProductType::className(), ['id' => 'product_type_id']);
-    }
+    }*/
 
     public function getProductTypes()
     {
@@ -172,6 +177,17 @@ class Product extends \yii\db\ActiveRecord
         */
         //get type fro
         return $answer;
+    }
+
+
+    public function clearType()
+    {
+
+    }
+
+    public function addType($type_id)
+    {
+
     }
 
 

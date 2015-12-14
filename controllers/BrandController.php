@@ -153,7 +153,12 @@ class BrandController extends ActiveController
         'ssl_verify'      => false,
     );
         $client = new \WC_API_Client( 'http://www.jetpilot.co.th', 'ck_dcbc1be1c7eb230f2b86cbed56009d80e8d08d69', 'cs_b793e2d8f0bc20f67684e7d21d0963c9746c3408', $options );
-        $items = $client->products->get();
+        $items = $client->orders->get(null, array(
+            "filter" => array(
+                "status" =>"completed"
+            )
+        ));
+        return $items;
         $result = array();
         foreach ($items->products as $product) {
             # code...
@@ -286,11 +291,12 @@ class BrandController extends ActiveController
                         $product_type->save();
                         array_push($message, "Add product type {$category_name} -> id {$product_type->id}");
                     }else
-                    
+
                         array_push($message, "need to find product id for {$category_name}");
 
 
                 }
+                
                 $single_type = $product->categories[0];
                 $product_type = ProductType::find()->where(['name'=> $single_type])->one();
                 $p->product_type_id = $product_type->id;
