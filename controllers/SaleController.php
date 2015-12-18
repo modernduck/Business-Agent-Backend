@@ -96,8 +96,13 @@ class SaleController extends ActiveController
         $brand = Brand::findIdentityByAccessToken($token);
 
         //filter by time[date / month / year] | branchs
-        
-        return Sale::find()->joinWith("branch")->joinWith('products')->where(['branch.brand_id' => $brand->id])->all();
+        if(Brand::isGodToken($token))
+        {
+
+        }else if(!isset($brand) )
+            throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not brand) {$token}");
+        else
+            return Sale::find()->joinWith("branch")->joinWith('products')->where(['branch.brand_id' => $brand->id])->all();
     }
 
     public function actionCreate()

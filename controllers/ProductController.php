@@ -99,6 +99,8 @@ class ProductController extends ActiveController
 
        if(isset($product_type_id))
             return Product::find()->joinWith('productTypes')->where(['brand_id' => $brand->id, 'product_type_id' => $product_type_id])->all();
+        else if(!isset($brand) )
+            throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not brand)");
         else
             return Product::find()->joinWith('productTypes')->where(['brand_id' => $brand->id])->all();
            
