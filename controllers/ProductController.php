@@ -75,7 +75,8 @@ class ProductController extends ActiveController
         $token = $request->get(self::TOKEN_NAME);
         $brand = Brand::findIdentityByAccessToken($token);
         $model = Product::findOne($id);
-        $owner_brand_id = $model->productType->brand_id;
+
+        $owner_brand_id = $model->getBrandId();
         if(Brand::isGodToken($token))
         {
             return $model->delete();
@@ -150,33 +151,23 @@ class ProductController extends ActiveController
         $token = $request->get(self::TOKEN_NAME);
         $brand = Brand::findIdentityByAccessToken($token);
         $product_type_id = $request->getBodyParam('product_type_id');
-
-        $productType = ProductType::find()->where([
-            'brand_id' => $brand->id, 
-            'id' => $product_type_id
-        ])->one();
-        if($productType !== null)
-        {
-         
-            $product =  new Product();
-            $product->name = $request->getBodyParam('name');
-
-
-            $product->product_type_id = $product_type_id;
-
-            
-
-            $product->price = $request->getBodyParam('price');
-            $product->description = $request->getBodyParam('description');
-            $product->image = $request->getBodyParam('image');
-        }else
-               throw new \yii\web\HttpException(422, "not found any");
+        $product_types_ids = $request->getBodyParam('product_types');
+        $product =  new Product();
+        $product->name = $request->getBodyParam('name');
+        $product->price = $request->getBodyParam('price');
+        $product->description = $request->getBodyParam('description');
+        $product->image = $request->getBodyParam('image');
         if($product->save())
         {
-            $product->link('productTypes', $productType);
+            foreach ($product_types_ids as $type_id) {
+                # code...
+                $product_type = ProductType::findOne($type_id);
+                $product_type->link('products', $product);
+            }
+            
             return $product;
         }else
-            throw new \yii\web\HttpException(422, json_encode($productType));
+            throw new \yii\web\HttpException(422, json_encode($product->getErrors()));
             
     }
 

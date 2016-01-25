@@ -37,7 +37,7 @@ class Product extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'product_type_id', 'price'], 'required'],
+            [['name', 'price'], 'required'],
             [['product_type_id'], 'integer'],
             [['price'], 'double'],
             [['description', 'image'], 'string'],
@@ -202,8 +202,14 @@ class Product extends \yii\db\ActiveRecord
 
     public function afterSave($insert, $changedAttributes )
     {
-         $product_type = ProductType::findOne($this->product_type_id);
-        if(BrandConfig::get( $product_type->brand_id, 'is_connect_woocommerce'))
+
+        //$this->product_types
+
+        $product_types = $this->getProductTypes()->all();
+        if(count($product_types) > 0)
+         $product_type = $product_types[0]; //ProductType::findOne($this->product_type_id);
+
+        if(count($product_types) > 0 && BrandConfig::get( $product_type->brand_id, 'is_connect_woocommerce'))
         {
             $options = array(
                 'debug'           => true,
@@ -239,7 +245,9 @@ class Product extends \yii\db\ActiveRecord
 
     public function beforeDelete()
     {
-          $product_type = ProductType::findOne($this->product_type_id);
+          $product_types = $this->getProductTypes()->all();
+        if(count($product_types) > 0)
+         $product_type = $product_types[0]; //ProductType::findOne($this->product_type_id);
         if(BrandConfig::get( $product_type->brand_id, 'is_connect_woocommerce'))
         {
               $options = array(
@@ -256,6 +264,17 @@ class Product extends \yii\db\ActiveRecord
 
 
         return parent::beforeDelete();
+    }
+
+    public function getBrandId()
+    {
+        $product_types = $this->getProductTypes()->all();
+        if(count($product_types) > 0)
+        {
+            $product_type = $product_types[0]; //ProductType::findOne($this->product_type_id);
+            return $product_type->brand_id;
+        }else
+            return null;
     }
 
 

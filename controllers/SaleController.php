@@ -101,6 +101,12 @@ class SaleController extends ActiveController
 
         }else if(!isset($brand) )
             throw  new \yii\web\HttpException(403, "you shall not pass fcker!(Not brand) {$token}");
+        else if(isset($_GET['from']) && isset($_GET['till']) ){
+            $from = $_GET['from'];
+            $till = $_GET['till'];
+            ;
+            return Sale::find()->joinWith("branch")->joinWith('products')->where(['branch.brand_id' => $brand->id])->andWhere("sale.create_time >= '{$from}' ")->andWhere("sale.create_time < '{$till}' ")->all();
+        }
         else
             return Sale::find()->joinWith("branch")->joinWith('products')->where(['branch.brand_id' => $brand->id])->all();
     }

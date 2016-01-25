@@ -3,7 +3,7 @@
 namespace app\models;
 
 use Yii;
-
+use yii\db\Query;
 /**
  * This is the model class for table "inventory".
  *
@@ -41,8 +41,15 @@ class Inventory extends \yii\db\ActiveRecord
             // field name is the same as the attribute name
             'count',
             'product',
-            'product_type' => function($model){
-                return $this->product->productType->name;
+            
+             'product_types' => function($model)
+            {
+                $query = new Query;
+                $query->select('name,product_type_id')
+                    ->from('product_has_product_type')
+                    ->innerJoin("product_type", "product_type.id =  product_type_id")
+                    ->where(['product_has_product_type.product_id' => $model->product_id]);
+                return $query->all();
             },
         ];
     }
